@@ -22,13 +22,19 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd lambda  # Change to the directory containing package.json
         npm install  # Or any other package manager if you're using a different language
+
+    - name: Zip Lambda function
+      run: |
+        cd lambda  # Change to the directory containing Lambda code
+        zip -r function.zip .  # Make sure you zip all necessary files
 
     - name: Deploy to Lambda
       run: |
         aws lambda update-function-code \
           --function-name my-lambda-function  # Replace with your Lambda function name
-          --zip-file fileb://function.zip  # The path to your zip file (make sure to zip the Lambda code)
+          --zip-file fileb://lambda/function.zip  # Path to the zip file after being created
 
     - name: Verify deployment
       run: |
