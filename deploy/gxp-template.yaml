@@ -5,16 +5,18 @@ Resources:
   AutoScheduler:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: index.handler
+      # Handler: index.handler
       Role: arn:aws:iam::273354660155:role/lambda_learn
       FunctionName: AutoScheduler
+      CodeUri: ../aws/lambda
+      Handler: lambda.lambda_handler
       MemorySize: 128
       Timeout: 300
       Runtime: python3.9
       Code:
         ZipFile: |
           import josn
-          def handler(event, context):
+          def handler(event, event):
               data={
                 name:'Boopathy',
                 age:"26"
@@ -22,7 +24,7 @@ Resources:
               d=json.dumps(data)
               print(d)
               return "AutoScheduler is running"
-
+         
       Environment:
         Variables:
           ENV_VAR: value
