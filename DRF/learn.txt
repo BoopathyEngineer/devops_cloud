@@ -1,0 +1,8 @@
+Rest - http protocol
+Rest Web service
+json is light weight
+easy development - human understand
+less secure
+Architectural Style
+
+http verbs - method call
