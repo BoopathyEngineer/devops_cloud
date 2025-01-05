@@ -26,7 +26,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: gxp-feat
-          template: deploy/cognito-template1.yaml
+          template: deploy/cognito-template.yaml
           parameter-overrides: "Environment=feat"
           capabilities: CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
