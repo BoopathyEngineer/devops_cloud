@@ -6,7 +6,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: arn:aws:iam::273354660155:role/AutoSchedulerExecutionRole
+      Role: arn:aws:iam::273354660155:role/lambda_learn
       FunctionName: AutoScheduler
       MemorySize: 128
       Timeout: 300
@@ -24,7 +24,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: arn:aws:iam::273354660155:role/SchedulerLambdaExecutionRole
+      Role: arn:aws:iam::273354660155:role/lambda_learn
       FunctionName: SchedulerLambdaFunction
       MemorySize: 128
       Timeout: 300
