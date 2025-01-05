@@ -60,22 +60,6 @@ Resources:
           ENV_VAR: value
 
 
-  # AuthLambdaFunction:
-  #   Type: AWS::Lambda::Function
-  #   Properties:
-  #     FunctionName: learn_server_less
-  #     Role: arn:aws:iam::273354660155:role/lambda_learn
-  #     Code:
-  #       S3Bucket: aws-sam-cli-managed-default-samclisourcebucket-hfang8j4wu4m
-  #       S3Key: 480965158d94ec333718bce2c62b3800.template 
-  #     Handler: lambda_function.scheduler_handler
-  #     Runtime: python3.9
-  #     MemorySize: 128
-  #     Timeout: 300
-  #     Environment:
-  #       Variables:
-  #         ENV_VAR: value
-
 
 Outputs:
   AutoSchedulerFunction:
