@@ -389,8 +389,8 @@ Resources:
     Properties:
       FunctionName: !Sub gxpgateway-${Environment}${SubEnv}
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ../src/
-      Handler: app.lambda_handler
+      CodeUri: ../aws/lambda
+      Handler: lambda_function.lambda_handler
       Runtime: python3.9
       Events:
         LambdaHandlerAPI:
