@@ -1,0 +1,36 @@
+name: Lambda API Gateway Deployment
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  lambda_api_gateway_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      # Step 2: Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Step 3: Deploy CloudFormation Stack
+      - name: Deploy Lambda and API Gateway
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: lambda-api-gateway-stack
+          template: path/to/lambda-api-gateway.yaml
+          capabilities: CAPABILITY_NAMED_IAM
+          no-fail-on-empty-changeset: "1"
+          termination-protection: "0"
