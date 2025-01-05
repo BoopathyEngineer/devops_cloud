@@ -41,24 +41,15 @@ jobs:
           COGNITO=us-east-1_sts6N2VIW
           SUB_ENV=''
           DB_NAME=gxp
-          CLIENT=vrvc7adabbtqsvheddjikvq8c
-          DOMAIN=api.service.zita.ai
-          CERT_ARN=$(aws acm list-certificates --certificate-statuses ISSUED \
-          --query 'CertificateSummaryList[?DomainName==`api.service.zita.ai`].CertificateArn' \
-          --output text)
+
 
           PARAMS="ParameterKey=Environment,ParameterValue=${ENV}"
           PARAMS+=" ParameterKey=SubEnv,ParameterValue=${SUB_ENV}"
-          PARAMS+=" ParameterKey=CognitoID,ParameterValue=${COGNITO}"
-          PARAMS+=" ParameterKey=ClientID,ParameterValue=${CLIENT}"
-          PARAMS+=" ParameterKey=DomainName,ParameterValue=${DOMAIN}"
-          PARAMS+=" ParameterKey=CertificateArn,ParameterValue=${CERT_ARN}"
+
           
           echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
           echo BRANCH_NAME=$BRANCH_NAME >> $GITHUB_ENV
-          echo COGNITO=$COGNITO >> $GITHUB_ENV
           echo ENV=$ENV >> $GITHUB_ENV
-          echo CLIENT=$CLIENT >> $GITHUB_ENV
           echo PARAMS=$PARAMS >> $GITHUB_ENV
           
 
