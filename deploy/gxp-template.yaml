@@ -6,33 +6,37 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: arn:aws:iam::273354660155:role/AutoSchedulerExecutionRole  # Replace with your actual AWS account ID
+      Role: arn:aws:iam::273354660155:role/AutoSchedulerExecutionRole
       FunctionName: AutoScheduler
       MemorySize: 128
       Timeout: 300
       Runtime: python3.9
       Code:
-        S3Bucket: my-bucket  # Replace with your S3 bucket name
-        S3Key: my-function.zip  # Path to your Lambda function code
+        ZipFile: |
+          def handler(event, context):
+              return "AutoScheduler is running"
+
       Environment:
         Variables:
-          ENV_VAR: value  # Example environment variable, adjust as needed
+          ENV_VAR: value
 
   SchedulerLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: arn:aws:iam::273354660155:role/SchedulerLambdaExecutionRole  # Replace with your actual AWS account ID
+      Role: arn:aws:iam::273354660155:role/SchedulerLambdaExecutionRole
       FunctionName: SchedulerLambdaFunction
       MemorySize: 128
       Timeout: 300
       Runtime: python3.9
       Code:
-        S3Bucket: my-bucket  # Replace with your S3 bucket name
-        S3Key: scheduler-function.zip  # Path to your Lambda function code
+        ZipFile: |
+          def handler(event, context):
+              return "Scheduler Lambda is running"
+
       Environment:
         Variables:
-          ENV_VAR: value  # Example environment variable, adjust as needed
+          ENV_VAR: value
 
 Outputs:
   AutoSchedulerFunction:
