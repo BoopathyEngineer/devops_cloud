@@ -39,7 +39,7 @@ jobs:
         id: ssm_params
         run: |
           ENV=dev
-          COGNITO=us-east-2_wRuaP1B27
+          COGNITO=us-west-1_MXDHqjttg
           SUB_ENV=''
           DB_NAME=gxp
           CLIENT=vrvc7adabbtqsvheddjikvq8c
@@ -64,7 +64,7 @@ jobs:
           
 
       - name: SAM build
-        run: sam build --use-container --template deploy/api-template.yaml --config-file deploy/samconfig-prod.toml
+        run: sam build --use-container --template deploy/gxp-template.yaml --config-file deploy/samconfig-prod.toml
 
       - name: SAM deploy
         run: |
