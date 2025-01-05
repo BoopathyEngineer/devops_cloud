@@ -641,21 +641,6 @@ Outputs:
   LambdaHandlerFunction:
     Description: gxp's LambdaHandler Function ARN
     Value: !GetAtt LambdaHandlerFunction.Arn
-  UserPoolARN:
-    Description: ARN of the  Cognito User Pool
-    Value: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoID}
-  CongitoID:
-    Description: CongitoID of the Cognito User Pool
-    Value: !Sub ${CognitoID}
-  ClientID:
-    Description: ClientID of the Cognito User Pool
-    Value: !Sub ${ClientID}
-  CertificateArn:
-    Description: CertificateArn of this Workflow
-    Value: !Sub ${CertificateArn}
-  DomainName:
-    Description: DomainName of this Workflow
-    Value: !Sub ${DomainName}
   ApiId:
     Description: "ID of the API Gateway"
     Value: !Ref MyApi
