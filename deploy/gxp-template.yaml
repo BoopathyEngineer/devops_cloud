@@ -1,10 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 
-Parameters:
-  # Removed DomainName, ClientID, CognitoID, and CertificateArn parameters
-  # No parameters for domain, Cognito, or certificate
-
 Resources:
   AutoScheduler:
     Type: AWS::Lambda::Function
@@ -15,7 +11,6 @@ Resources:
       CodeUri: s3://my-bucket/my-function.zip
       MemorySize: 128
       Timeout: 300
-      Runtime: nodejs14.x  # Added runtime for the Lambda function
       Environment:
         Variables:
           ENV_VAR: value
@@ -29,38 +24,9 @@ Resources:
       CodeUri: s3://my-bucket/my-function.zip
       MemorySize: 128
       Timeout: 300
-      Runtime: nodejs14.x  # Added runtime for the Lambda function
       Environment:
         Variables:
           ENV_VAR: value
-
-  GXPUserTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: GXPUserTable
-      AttributeDefinitions:
-        - AttributeName: UserID
-          AttributeType: S
-      KeySchema:
-        - AttributeName: UserID
-          KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
-
-  GXPThreadChatTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: GXPThreadChatTable
-      AttributeDefinitions:
-        - AttributeName: ThreadID
-          AttributeType: S
-      KeySchema:
-        - AttributeName: ThreadID
-          KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
 
   MyApi:
     Type: AWS::ApiGateway::RestApi
@@ -92,74 +58,6 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SchedulerLambdaFunction.Arn}/invocations
-
-  OptionsMethodAPI:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: OPTIONS
-      ResourceId: !Ref ProxyResourceAPI
-      RestApiId: !Ref MyApi
-      Integration:
-        Type: MOCK
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-
-  Default4XXMyApiResponse:
-    Type: AWS::ApiGateway::MethodResponse
-    Properties:
-      HttpMethod: GET
-      ResourceId: !Ref ProxyResourceAPI
-      RestApiId: !Ref MyApi
-      StatusCode: 400
-
-  ResourceNotFoundMyApiResponse:
-    Type: AWS::ApiGateway::MethodResponse
-    Properties:
-      HttpMethod: GET
-      ResourceId: !Ref ProxyResourceAPI
-      RestApiId: !Ref MyApi
-      StatusCode: 404
-
-  UnauthorizedMyApiResponse:
-    Type: AWS::ApiGateway::MethodResponse
-    Properties:
-      HttpMethod: GET
-      ResourceId: !Ref ProxyResourceAPI
-      RestApiId: !Ref MyApi
-      StatusCode: 401
-
-  MyStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      DeploymentId: !Ref MyDeploymentApi
-      RestApiId: !Ref MyApi
-      StageName: prod
-
-  MyUsagePlan:
-    Type: AWS::ApiGateway::UsagePlan
-    Properties:
-      Name: MyUsagePlan
-      ApiStages:
-        - ApiId: !Ref MyApi
-          Stage: prod
-
-  MyApiKey:
-    Type: AWS::ApiGateway::ApiKey
-    Properties:
-      Name: MyApiKey
-      Enabled: true
-      StageKeys:
-        - ApiId: !Ref MyApi
-          StageName: prod
-
-  MyUsagePlanKey:
-    Type: AWS::ApiGateway::UsagePlanKey
-    Properties:
-      KeyId: !Ref MyApiKey
-      KeyType: API_KEY
-      UsagePlanId: !Ref MyUsagePlan
 
 Outputs:
   MyApiUrl:
