@@ -1,4 +1,4 @@
-service: basic-serverless-lambda-python
+service: devops_cloud
 
 provider:
   name: aws

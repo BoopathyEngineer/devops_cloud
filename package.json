@@ -1,5 +1,5 @@
 {
-    "name": "basic-serverless-lambda-python",
+    "name": "devops_cloud",
     "version": "1.0.0",
     "description": "Basic CI/CD deployment setup for AWS Lambda functions in Python using the Serverless Framework",
     "scripts": {
