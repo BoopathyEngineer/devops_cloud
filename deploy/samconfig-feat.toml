@@ -1,14 +1,13 @@
 version = 0.1
 [default]
 [default.build.parameters]
-s3_bucket = "zita-feat"
-s3_prefix = "zita-feat"
-region = "us-west-1"
+s3_bucket = "learn-cloud-ops"
+s3_prefix = "learn-cloud-ops"
+region = "us-east-2"
 [default.deploy]
 [default.deploy.parameters]
-s3_bucket = "zita-feat"
-s3_prefix = "zita-feat"
-region = "us-west-2"
+s3_bucket = "learn-cloud-ops"
+s3_prefix = "learn-cloud-ops"
+region = "us-east-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"
-image_repositories = []
