@@ -1,0 +1,528 @@
+{
+    "zitaconfig-dev": [
+        {
+            "api_name": {
+                "S": "resume_parser"
+            },
+            "Active": {
+                "BOOL": false
+            },
+            "File_format": {
+                "L": [
+                    {
+                        "S": ".txt"
+                    },
+                    {
+                        "S": ".doc"
+                    },
+                    {
+                        "S": ".docx"
+                    },
+                    {
+                        "S": ".pdf"
+                    }
+                ]
+            },
+            "Checked": {
+                "BOOL": false
+            },
+            "Resume_size": {
+                "N": "2"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "Jd_maxLength": {
+                "N": "2000"
+            },
+            "min_resume": {
+                "N": "2"
+            },
+            "File_format": {
+                "L": [
+                    {
+                        "S": ".txt"
+                    },
+                    {
+                        "S": ".doc"
+                    },
+                    {
+                        "S": ".docx"
+                    },
+                    {
+                        "S": ".pdf"
+                    }
+                ]
+            },
+            "Jd_minLength": {
+                "N": "300"
+            },
+            "Resume_size": {
+                "N": "2"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            },
+            "api_name": {
+                "S": "comparitive_analysis"
+            },
+            "max_resume": {
+                "N": "5"
+            },
+            "Active": {
+                "BOOL": false
+            },
+            "Jd_file_size": {
+                "N": "5"
+            }
+        },
+        {
+            "Active": {
+                "BOOL": false
+            },
+            "api_name": {
+                "S": "jd_generation"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "Jd_maxLength": {
+                "N": "2000"
+            },
+            "File_format": {
+                "L": [
+                    {
+                        "S": ".txt"
+                    },
+                    {
+                        "S": ".doc"
+                    },
+                    {
+                        "S": ".docx"
+                    },
+                    {
+                        "S": ".pdf"
+                    }
+                ]
+            },
+            "Jd_minLength": {
+                "N": "300"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            },
+            "Resume_size": {
+                "N": "2"
+            },
+            "Total_question": {
+                "N": "15"
+            },
+            "api_name": {
+                "S": "interview_questions"
+            },
+            "Active": {
+                "BOOL": true
+            },
+            "Jd_file_size": {
+                "N": "5"
+            }
+        },
+        {
+            "Jd_maxLength": {
+                "N": "2000"
+            },
+            "File_format": {
+                "L": [
+                    {
+                        "S": ".txt"
+                    },
+                    {
+                        "S": ".doc"
+                    },
+                    {
+                        "S": ".docx"
+                    },
+                    {
+                        "S": ".pdf"
+                    }
+                ]
+            },
+            "Jd_minLength": {
+                "N": "300"
+            },
+            "Resume_size": {
+                "N": "2"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            },
+            "api_name": {
+                "S": "jd_parser"
+            },
+            "Active": {
+                "BOOL": false
+            }
+        },
+        {
+            "Jd_maxLength": {
+                "N": "2000"
+            },
+            "File_format": {
+                "L": [
+                    {
+                        "S": ".txt"
+                    },
+                    {
+                        "S": ".doc"
+                    },
+                    {
+                        "S": ".docx"
+                    },
+                    {
+                        "S": ".pdf"
+                    }
+                ]
+            },
+            "Jd_minLength": {
+                "N": "300"
+            },
+            "Resume_size": {
+                "N": "2"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            },
+            "api_name": {
+                "S": "matching"
+            },
+            "Active": {
+                "BOOL": true
+            },
+            "Jd_file_size": {
+                "N": "5"
+            }
+        },
+        {
+            "Jd_maxLength": {
+                "N": "2000"
+            },
+            "min_resume": {
+                "N": "2"
+            },
+            "File_format": {
+                "L": [
+                    {
+                        "S": ".txt"
+                    },
+                    {
+                        "S": ".doc"
+                    },
+                    {
+                        "S": ".docx"
+                    },
+                    {
+                        "S": ".pdf"
+                    }
+                ]
+            },
+            "Jd_minLength": {
+                "N": "300"
+            },
+            "Resume_size": {
+                "N": "2"
+            },
+            "Plans": {
+                "L": [
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "1"
+                            },
+                            "Count": {
+                                "N": "5"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "2"
+                            },
+                            "Count": {
+                                "N": "15"
+                            }
+                        }
+                    },
+                    {
+                        "M": {
+                            "Plan": {
+                                "N": "3"
+                            },
+                            "Count": {
+                                "N": "50"
+                            }
+                        }
+                    }
+                ]
+            },
+            "api_name": {
+                "S": "profile_summary"
+            },
+            "max_resume": {
+                "N": "5"
+            },
+            "Active": {
+                "BOOL": false
+            },
+            "Jd_file_size": {
+                "N": "5"
+            }
+        }
+    ],
+    "client_feature-dev": {
+        "email": "pugazhe@gmail.com",
+        "subscriptions": [
+            {
+                "access_count": 60,
+                "addon_count": 10,
+                "api_name": "comparitive_analysis",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "feature_count": 50,
+                "name": "Comparitive Analysis",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            },
+            {
+                "access_count": 9,
+                "api_name": "matching",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "name": "Matching",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            },
+            {
+                "access_count": 1,
+                "api_name": "interview_questions",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "name": "Interview Questions",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            },
+            {
+                "access_count": 8,
+                "api_name": "jd_parser",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "name": "Jd Parser",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            },
+            {
+                "access_count": 9,
+                "api_name": "resume_parser",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "name": "Resume Parser",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            },
+            {
+                "access_count": 9,
+                "api_name": "profile_summary",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "name": "Profile Summary",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            },
+            {
+                "access_count": 9,
+                "api_name": "jd_generation",
+                "expired_at": "2024-08-20 16:30:22.619270",
+                "name": "Jd Generation",
+                "purchased_at": "2024-08-03 16:30:22.619270"
+            }
+        ]
+    }
+}

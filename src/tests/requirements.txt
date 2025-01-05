@@ -1,0 +1,8 @@
+pytest
+boto3
+requests
+tika 
+openai
+exceptions
+pdfplumber
+docx
