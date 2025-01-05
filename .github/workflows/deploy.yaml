@@ -20,18 +20,48 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"  # Change to your region
 
-      - name: Install Python 3.8
+      - name: Install dependencies for pyenv
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3.8 python3.8-dev python3.8-distutils
-          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-          python3 --version  # Verify Python version
+          sudo apt-get install -y \
+            make \
+            build-essential \
+            libssl-dev \
+            zlib1g-dev \
+            libbz2-dev \
+            libreadline-dev \
+            libsqlite3-dev \
+            wget \
+            curl \
+            llvm \
+            libncurses5-dev \
+            libncursesw5-dev \
+            xz-utils \
+            tk-dev \
+            libffi-dev \
+            liblzma-dev \
+            python3-openssl \
+            git
+
+      - name: Install pyenv
+        run: |
+          curl https://pyenv.run | bash
+          echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> ~/.bashrc
+          echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
+          echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Install Python 3.8 using pyenv
+        run: |
+          pyenv install 3.8.12
+          pyenv global 3.8.12
+          python --version  # Verify Python version
 
       - name: Install pip for Python 3.8
         run: |
           curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python3 get-pip.py
-          python3 -m pip install --upgrade pip
+          python get-pip.py
+          python -m pip install --upgrade pip
 
       - name: Install dependencies
         run: |
