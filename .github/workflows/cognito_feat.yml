@@ -19,7 +19,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: us-east-2
 
       - name: Deploy to AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -31,4 +31,7 @@ jobs:
           no-fail-on-empty-changeset: "1"
           termination-protection: "1"
 
-
+      # The bucket `diana-swagger-constants` is already created in S3 that contains all
+      # the dependencies for S3 to run swagger. The dependencies are a bit extensive,
+      # so it was decided to not have S3 create it each time
+      
