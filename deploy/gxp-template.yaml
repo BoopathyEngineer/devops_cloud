@@ -18,22 +18,6 @@ Parameters:
     Description: Sub environment to deploy the application
     MaxLength: 30
 
-  CognitoID:
-    Type: String
-    Description: cognito deployment
-  
-  ClientID:
-    Type: String
-    Description: cognito client id
-
-  CertificateArn:
-    Type: String
-    Description: ARN of the SSL certificate
-  
-  DomainName:
-    Type: String
-    Description: The custom domain name for the API Gateway
-
 
 Globals:
   Function:
@@ -54,9 +38,7 @@ Conditions:
 
   SchedulerOn: 
     Fn::Or:
-      # - Fn::Equals:
-      #     - !Ref Environment
-      #     - feature
+
       - Fn::Equals:
           - !Ref Environment
           - dev
