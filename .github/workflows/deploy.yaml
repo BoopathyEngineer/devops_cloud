@@ -1,0 +1,40 @@
+name: Deploy Lambda with API Gateway using SAM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up AWS credentials
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "us-east-1" # Change to your region
+
+      # Install dependencies and SAM CLI
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip zip
+          pip3 install aws-sam-cli
+
+      # Build the SAM application
+      - name: SAM Build
+        run: |
+          sam build
+
+      # Deploy the SAM application
+      - name: SAM Deploy
+        run: |
+          sam deploy --no-confirm-changeset --stack-name my-sam-stack --capabilities CAPABILITY_IAM
