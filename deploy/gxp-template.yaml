@@ -1,0 +1,689 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  GXPAPI
+
+  Sample SAM Template for GXPAPI
+
+## More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+
+Parameters:
+  Environment:
+    Description: Sub environment to deploy the application
+    Type: String
+    Default: ''
+    # AllowedValues:
+    #   - staging
+    #   - production
+    # - staging
+    #   - production
+  SubEnv:
+    Type: String
+    Default: ''
+    Description: Sub environment to deploy the application
+    MaxLength: 30
+
+  CognitoID:
+    Type: String
+    Description: cognito deployment
+  
+  ClientID:
+    Type: String
+    Description: cognito client id
+
+  CertificateArn:
+    Type: String
+    Description: ARN of the SSL certificate
+  
+  DomainName:
+    Type: String
+    Description: The custom domain name for the API Gateway
+
+
+Globals:
+  Function:
+    Timeout: 600
+    MemorySize: 512
+    Tracing: Active
+    Environment:
+      Variables:
+        # CONFIGTABLE: !Ref DynamoDBConfigTable
+        # USERTABLE: !Ref DynamoDBUserTable
+        # CLIENTPURCHASETABLE: !Ref DynamoDBClientPurchaseTable
+        # APITABLE: !Ref DynamoDBApiTable
+        # NOTIFICATIONTABLE: !Ref DynamoDBNotificationTable
+        # INVOICETABLE: !Ref DynamoDBInvoiceTable
+        # COUPONTABLE: !Ref DynamoDBCouponTable
+        # COUPONUSERSPECIFICTABLE: !Ref DynamoDBCouponUserspecificTable
+        # USERCOUPONTABLE: !Ref DynamoDBUserCouponTable
+        ENV: !Sub ${Environment}
+        COGNITO : !Sub ${CognitoID}
+        CLIENT : !Sub ${ClientID}
+        APIGATEWAY : !Ref MyApi
+        # BUCKETNAME : !Ref S3BranchBucket
+
+Conditions:
+  CustomDomains: !Equals [!Ref Environment, "dev"]
+
+  SchedulerOn: 
+    Fn::Or:
+      # - Fn::Equals:
+      #     - !Ref Environment
+      #     - feature
+      - Fn::Equals:
+          - !Ref Environment
+          - dev
+      - Fn::Equals:
+          - !Ref Environment
+          - staging
+      - Fn::Equals:
+          - !Ref Environment
+          - prod
+
+  # Api:
+  #   TracingEnabled: true
+
+
+Resources:
+  #: ROLE
+  LambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub gxp-lambda-${Environment}-${SubEnv}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - scheduler.amazonaws.com
+                - events.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+        - "arn:aws:iam::aws:policy/AdministratorAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator"
+        - "arn:aws:iam::aws:policy/AmazonAPIGatewayInvokeFullAccess"
+      Policies:
+        - PolicyName: !Sub gxp-lambda-${Environment}${SubEnv}
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+        - PolicyName: LambdaLogsPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: "*"
+
+  #: S3-Bucket
+  # S3BranchBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Sub gxp-${Environment}${SubEnv}
+  #     AccessControl: Private
+  #     BucketEncryption:
+  #       ServerSideEncryptionConfiguration:
+  #         - ServerSideEncryptionByDefault:
+  #             SSEAlgorithm: AES256
+
+  #: COGNTIO AUTHENTICATION FOR AUTH AuthHandlerFunction         
+  MyApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub auth-${Environment}-${SubEnv}
+      BinaryMediaTypes:
+        - multipart/form-data
+      FailOnWarnings: true
+      ApiKeySourceType: AUTHORIZER
+      MinimumCompressionSize: 10485760
+
+  MyAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      Name: MyCognitoAuthorizer
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoID}
+      AuthorizerResultTtlInSeconds: 300
+
+  ProxyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ParentId: !GetAtt MyApiGateway.RootResourceId
+      PathPart: "{proxy+}"
+
+  ProxyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ResourceId: !Ref ProxyResource
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref MyAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthHandlerFunction.Arn}/invocations
+          - LambdaFunction: !Ref AuthHandlerFunction
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+        TimeoutInMillis: 59000
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  OptionsGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ResourceId: !Ref ProxyResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        TimeoutInMillis: 59000
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  Default4XXMyApiGatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref MyApiGateway
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  ResourceNotFoundMyApiGatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: RESOURCE_NOT_FOUND
+      RestApiId: !Ref MyApiGateway
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  UnauthorizedMyApiGatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: UNAUTHORIZED
+      RestApiId: !Ref MyApiGateway
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  MyDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: 
+      - ProxyMethod
+      - Default4XXMyApiGatewayResponse
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      StageName: Prod
+
+
+  #: NO AUTHENTICATION FOR AUTH SignupHandlerFunction  
+  MySignUpGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub signup-${Environment}-${SubEnv}
+      BinaryMediaTypes:
+        - multipart/form-data
+      FailOnWarnings: true
+      ApiKeySourceType: AUTHORIZER
+      MinimumCompressionSize: 10485760
+  
+  ProxyResourceSignUp:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MySignUpGateway
+      ParentId: !GetAtt MySignUpGateway.RootResourceId
+      PathPart: "{proxy+}"
+
+  ProxyMethodSignUp:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MySignUpGateway
+      ResourceId: !Ref ProxyResourceSignUp
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignupHandlerFunction.Arn}/invocations
+          - LambdaFunction: !Ref SignupHandlerFunction
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+        TimeoutInMillis: 59000
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  OptionsMySignUpGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MySignUpGateway
+      ResourceId: !Ref ProxyResourceSignUp
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        TimeoutInMillis: 59000
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  Default4XXMySignUpGatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref MySignUpGateway
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  ResourceNotFoundMySignUpGatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: RESOURCE_NOT_FOUND
+      RestApiId: !Ref MySignUpGateway
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  UnauthorizedMySignUpGatewayResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: UNAUTHORIZED
+      RestApiId: !Ref MySignUpGateway
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  MySignupDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: 
+      - ProxyMethodSignUp
+      - Default4XXMySignUpGatewayResponse
+    Properties:
+      RestApiId: !Ref MySignUpGateway
+      StageName: Prod
+
+
+
+
+  #: LAMBDDA FUNCTION
+  LambdaHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub gxpgateway-${Environment}${SubEnv}
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ../src/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        LambdaHandlerAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId : !Ref MyApi
+            Path: /{proxy+}
+            Method: ANY
+
+  AuthHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub gxpauth-${Environment}${SubEnv}
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ../src/
+      Handler: app.auth_handler
+      Runtime: python3.9
+      Events:
+        LambdaHandlerAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId : !Ref MyApiGateway
+            Path: /{proxy+}
+            Method: ANY
+
+  SignupHandlerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: !Sub gxpsignup-${Environment}${SubEnv}
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ../src/
+      Handler: signin.auth_handler
+      Runtime: python3.9
+      Events:
+        LambdaHandlerAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId : !Ref MySignUpGateway
+            Path: /{proxy+}
+            Method: ANY
+            
+  #: SCHEUDLER FUNCTION
+  PermissionForAutoSchedulerToInvokeTriggerFunction:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt SchedulerLambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+
+  AutoScheduler:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub gxpscheduler-${Environment}${SubEnv}
+      ScheduleExpression: "cron(0 10 * * ? *)" # 10 o clock at every day
+      # ScheduleExpression: "rate(1 minute)" # Trigger every 1 seconds
+      State: !If [SchedulerOn, "ENABLED", "DISABLED"]
+      Targets:
+        - Arn: !GetAtt SchedulerLambdaFunction.Arn
+          Id: SchedulerLambdaFunction
+
+  SchedulerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub gxpappscheduler-${Environment}${SubEnv}
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ../src/
+      Handler: scheduler.scheduler_handler
+      Runtime: python3.9
+    # DependsOn: LambdaLogGroup
+
+
+  #: DYNAMO_DB
+  GXPUserTable:
+    Type: AWS::DynamoDB::Table
+    # DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub gxp_user-${Environment}${SubEnv}
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: thread_id
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: thread_id
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+      SSESpecification:
+        SSEEnabled: true
+
+  GXPThreadChatTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub gxp_thread_chat-${Environment}${SubEnv}
+      KeySchema:
+        - AttributeName: thread_id
+          KeyType: HASH
+        - AttributeName: message_id
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: thread_id
+          AttributeType: S
+        - AttributeName: message_id
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: environment
+          Value: !Ref Environment
+      SSESpecification:
+        SSEEnabled: true
+
+
+  MyApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub gxp-gateway-${Environment}${SubEnv}
+      BinaryMediaTypes:
+        - multipart/form-data
+
+  MyDeploymentApi:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: 
+      - ProxyMethodAPI
+      - Default4XXMyApiResponse
+    Properties:
+      RestApiId: !Ref MyApi
+      Description: 'API Deployment for Production'
+
+  ProxyResourceAPI:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyApi
+      ParentId: !GetAtt MyApi.RootResourceId
+      PathPart: "{proxy+}"
+
+  ProxyMethodAPI:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApi
+      ResourceId: !Ref ProxyResourceAPI
+      HttpMethod: ANY
+      AuthorizationType: None
+      # AuthorizerId: !Ref MyAuthorizer
+      ApiKeyRequired: True
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaHandlerFunction.Arn}/invocations
+          - LambdaFunction: !Ref LambdaHandlerFunction
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+        TimeoutInMillis: 59000
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+
+  OptionsMethodAPI:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApi
+      ResourceId: !Ref ProxyResourceAPI
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        TimeoutInMillis: 59000
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  Default4XXMyApiResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref MyApi
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  ResourceNotFoundMyApiResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: RESOURCE_NOT_FOUND
+      RestApiId: !Ref MyApi
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  UnauthorizedMyApiResponse:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: UNAUTHORIZED
+      RestApiId: !Ref MyApi
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,PUT,DELETE,PATCH'"
+
+  MyStage:
+    Type: AWS::ApiGateway::Stage
+    # DependsOn:
+    #   - MyDeploymentApi
+    Properties:
+      StageName: prod
+      DeploymentId: !Ref MyDeploymentApi
+      RestApiId: !Ref MyApi
+
+  MyUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    # Condition: CreateUsagePlan
+    Properties:
+      UsagePlanName: !Sub gxp-gateway-${Environment}${SubEnv}
+      ApiStages:
+        - ApiId: !Ref MyApi
+          Stage: !Ref MyStage
+      Throttle:
+        BurstLimit: 100
+        RateLimit: 50
+      Quota:
+        Limit: 1000000
+        Period: DAY
+
+  MyApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: !Sub gxp-apikey-${Environment}${SubEnv}
+      Description: !Sub API Key for ${Environment}${SubEnv}
+      Enabled: true
+
+  MyUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref MyApiKey
+      KeyType: "API_KEY"
+      UsagePlanId: !Ref MyUsagePlan
+
+
+#: Outputs
+Outputs:
+  LambdaHandlerFunction:
+    Description: gxp's LambdaHandler Function ARN
+    Value: !GetAtt LambdaHandlerFunction.Arn
+  UserPoolARN:
+    Description: ARN of the  Cognito User Pool
+    Value: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoID}
+  CongitoID:
+    Description: CongitoID of the Cognito User Pool
+    Value: !Sub ${CognitoID}
+  ClientID:
+    Description: ClientID of the Cognito User Pool
+    Value: !Sub ${ClientID}
+  CertificateArn:
+    Description: CertificateArn of this Workflow
+    Value: !Sub ${CertificateArn}
+  DomainName:
+    Description: DomainName of this Workflow
+    Value: !Sub ${DomainName}
+  ApiId:
+    Description: "ID of the API Gateway"
+    Value: !Ref MyApi
+    
+
