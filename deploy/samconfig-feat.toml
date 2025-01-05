@@ -3,12 +3,12 @@ version = 0.1
 [default.build.parameters]
 s3_bucket = "zita-feat"
 s3_prefix = "zita-feat"
-region = "us-east-2"
+region = "us-west-1"
 [default.deploy]
 [default.deploy.parameters]
 s3_bucket = "zita-feat"
 s3_prefix = "zita-feat"
-region = "us-east-2"
+region = "us-west-2"
 confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"
 image_repositories = []
