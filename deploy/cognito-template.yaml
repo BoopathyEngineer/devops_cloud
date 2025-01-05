@@ -1,0 +1,408 @@
+Description: Template for creating a basic AWS Cognito User Pool and User Pool Client
+
+Parameters:
+  Environment:
+    Description: "Specify the Environment type of the stack."
+    Type: String 
+    AllowedValues:
+      - feat
+      - staging
+      - prod
+
+Resources:
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "gxp-${Environment}"
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: "OFF"
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 10
+      Schema:
+        - Name: birthdate
+          Mutable: true
+          Required: false
+
+        - Name: gender
+          Mutable: true
+          Required: false
+        
+        - Name: email  # add as Mantory field
+          Mutable: true
+          Required: true 
+
+        - Name: organisation
+          DeveloperOnlyAttribute: false
+          AttributeDataType: String
+          Mutable: true
+          StringAttributeConstraints:
+            MinLength: 0
+            MaxLength: 256
+
+        - Name: orgid
+          DeveloperOnlyAttribute: false
+          AttributeDataType: String
+          Mutable: true
+          StringAttributeConstraints:
+            MinLength: 0
+            MaxLength: 256
+
+        - Name: firstname
+          DeveloperOnlyAttribute: false
+          AttributeDataType: String
+          Mutable: true
+          StringAttributeConstraints:
+            MinLength: 0
+            MaxLength: 256
+
+        - Name: lastname
+          DeveloperOnlyAttribute: false
+          AttributeDataType: String
+          Mutable: true
+          StringAttributeConstraints:
+            MinLength: 0
+            MaxLength: 256
+      UsernameAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailMessage: '''<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <style>
+      table {
+        width: 100%;
+        border-spacing: 0px;
+        font-family: Calibri, sans-serif;
+      }
+      .header {
+        background: #fff;
+      }
+      .logo {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .title {
+        font-size: 40px;
+        font-weight: 700;
+        color: white;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        font-size: 20px;
+        color: white;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .trial {
+        color: rgb(14, 19, 24);
+        font-size: 14px;
+        text-align: center;
+        background: #9e9e9e63;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        font-weight: 600;
+      }
+      .message {
+        font-size: 20px;
+        padding-bottom: 10px;
+        padding-top: 10px;
+        color: rgb(14, 19, 24);
+        padding-left: 53px;
+        padding-right: 55px;
+      }
+      .features {
+        color: rgb(14, 19, 24);
+        font-family: Calibri, sans-serif;
+        font-size: 14px;
+        padding-bottom: 10px;
+        padding-left: 53px;
+        padding-right: 55px;
+      }
+      .features1 {
+        color: rgb(14, 19, 24);
+        font-family: Calibri, sans-serif;
+        font-size: 14px;
+        text-align: center;
+        padding-bottom: 10px;
+      }
+      .footer {
+        font-size: 14px;
+        font-family: Calibri, sans-serif;
+        text-align: center;
+        padding-top: 20px;
+        padding-bottom: 10px;
+        color: white;
+      }
+      .footer1 {
+        font-size: 14px;
+        font: Roboto;
+        text-align: center;
+        line-height: 16.41px;
+        padding-bottom: 20px;
+        padding-top: 10px;
+        color: white;
+        font-weight: 400;
+      }
+      .subfooter {
+        padding-bottom: 20px;
+      }
+      .mainheading {
+        font-size: 14px;
+      }
+      .box {
+        background-color: #ffffff;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 22px 35px;
+        margin: 30px 10px 30px 10px;
+      }
+      .subbox {
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        padding: 25px;
+        margin: 30px 40px 0px 40px;
+      }
+      .makeimagecenter {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .makeimagecenter1 {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td class="header" colspan="3">
+          <img
+            class="logo"
+            src="https://d2uv78z986v35y.cloudfront.net/Group_20891.png"
+            width="150"
+            alt="GxP Logo"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <div class="box">
+            <p
+              style="
+                font-size: 16px;
+                color: black;
+                font-family: Calibri, sans-serif;
+              "
+            >
+              Hello,
+            </p>
+            <p
+              style="
+                color: black;
+                font-family: Calibri, sans-serif;
+                font-size: 14px;
+                text-align: left;
+              "
+            >
+              You are receiving this email because you have initiated a process
+              requiring verification of your email address.<br />
+              To proceed, please enter the following verification code in the
+              appropriate screen:
+            </p>
+            <p
+              style="
+                color: black;
+                font-family: Calibri, sans-serif;
+                font-size: 14px;
+                text-align: left;
+              "
+            >
+              Your verification code is:
+              <b
+                style="
+                  font-size: 15px;
+                  font: Roboto;
+                  line-height: 17.58px;
+                  font-weight: 700px;
+                  paragraph: 4px;
+                "
+                >{####}</b
+              >.
+            </p>
+            <p
+              style="
+                color: black;
+                font-family: Calibri, sans-serif;
+                font-size: 14px;
+                text-align: left;
+              "
+            >
+              This verification code is valid for the <b>next 7 days</b>. If you
+              did not initiate this request, please disregard this email; no
+              changes have been made to your account.
+            </p>
+            <p
+              style="
+                color: black;
+                font: Roboto;
+                font-weight: 400px;
+                line-height: 16.41px;
+                paragraph: 4px;
+                font-size: 14px;
+                text-align: left;
+              "
+            >
+              Thank you for choosing GxP.
+            </p>
+            <p
+              style="
+                font-size: 15px;
+                font-family: Calibri, sans-serif;
+                text-align: left;
+                color: black;
+              "
+            >
+              Best Regards, <br />
+              The GxP Team
+            </p>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <div style="background-color: #10A37F">
+            <div class="footer">
+              Need help? Ask at
+              <a href="mailto:support@gxp.ai" style="color: #fcc203"
+                >support@gxp.ai</a
+              >
+              or visit our
+              <a href="https://www.zita.ai/knowledgebase" style="color: #fcc203"
+                >Help Center</a
+              >
+            </div>
+            <!-- <div class="footer1">
+              Sense7ai Inc,<br />
+              Corporate Commons,<br />
+              6200 Stoneridge MallRoad, Suite300, Pleasanton, CA, USA, 94588
+            </div> -->
+            <div style="text-align: center" class="subfooter">
+              <a href="https://twitter.com/ai_zita"
+                ><img
+                  src="https://zita2.s3.us-east-2.amazonaws.com/twitter.png"
+                  width="16"
+                  height="16"
+                  top="561"
+                  left="338"
+                  alt="Twitter"
+                  style="border-radius: 4px"
+              /></a>
+              <a href="https://www.linkedin.com/company/zita-ai/"
+                ><img
+                  src="https://zita2.s3.us-east-2.amazonaws.com/linkedin.png"
+                  width="16"
+                  height="16"
+                  top="561"
+                  left="359"
+                  alt="LinkedIn"
+              /></a>
+              <a href="https://www.youtube.com/channel/UCSjD_inAzR9Z4sMwFJJgUWA"
+                ><img
+                  src="https://d2uv78z986v35y.cloudfront.net/youtube.png"
+                  width="16"
+                  height="16"
+                  top="561"
+                  left="380"
+                  alt="YouTube"
+              /></a>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
+'''
+        EmailSubject: "Action Required: Verify Your Account"
+        
+
+  CognitoPoolDomain: 
+    Type: AWS::Cognito::UserPoolDomain 
+    Properties:
+      UserPoolId: !Ref CognitoUserPool 
+      Domain: !Sub  "gxp-${Environment}-domain"
+  
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      AccessTokenValidity: 12
+      ClientName: GXPAPI
+      GenerateSecret: false
+      UserPoolId: !Ref CognitoUserPool
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - openid
+        - aws.cognito.signin.user.admin
+        - profile
+      CallbackURLs:
+        - https://oauth.pstmn.io/v1/callback
+      LogoutURLs:
+        - https://oauth.pstmn.io/v1/callback
+      EnableTokenRevocation: false
+      ExplicitAuthFlows:
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_CUSTOM_AUTH
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      IdTokenValidity: 12
+      PreventUserExistenceErrors: ENABLED
+      RefreshTokenValidity: 30
+      SupportedIdentityProviders:
+        - COGNITO
+      ReadAttributes:
+        - birthdate
+        - gender
+        - email
+        - "custom:organisation"
+        - "custom:orgid"
+        - "custom:firstname"
+        - "custom:lastname"
+      WriteAttributes:
+        - birthdate
+        - gender
+        - email
+        - "custom:organisation"
+        - "custom:orgid"
+        - "custom:firstname"
+        - "custom:lastname"
+
+Outputs:
+  CognitoUserPoolId:
+    Description: "Cognito User Pool Id"
+    Value: !Ref CognitoUserPool
+
+  CognitoUserPoolClientId:
+    Description: "Cognito User Pool Client Id"
+    Value: !Ref CognitoUserPoolClient
