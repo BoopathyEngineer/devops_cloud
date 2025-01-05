@@ -44,6 +44,22 @@ Resources:
       Environment:
         Variables:
           ENV_VAR: value
+  SchedulerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_function.handler  # Matches `lambda_function.py`
+      Role: arn:aws:iam::273354660155:role/lambda_learn
+      FunctionName: SchedulerFunction
+      MemorySize: 128
+      Timeout: 300
+      Runtime: python3.9
+      Code:
+        ZipFile: !Sub "fileb://aws/lambda/lambda_function.zip"
+      Environment:
+        Variables:
+          ENV_VAR: value
+
+
   # AuthLambdaFunction:
   #   Type: AWS::Lambda::Function
   #   Properties:
