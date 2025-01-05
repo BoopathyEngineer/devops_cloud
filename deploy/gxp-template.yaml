@@ -6,62 +6,39 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: arn:aws:iam::${AWS::AccountId}:role/AutoSchedulerExecutionRole
+      Role: arn:aws:iam::273354660155:role/AutoSchedulerExecutionRole  # Replace with your actual AWS account ID
       FunctionName: AutoScheduler
-      CodeUri: s3://my-bucket/my-function.zip
       MemorySize: 128
       Timeout: 300
-      Runtime: python3.9  # Ensure runtime is set here
+      Runtime: python3.9
+      Code:
+        S3Bucket: my-bucket  # Replace with your S3 bucket name
+        S3Key: my-function.zip  # Path to your Lambda function code
       Environment:
         Variables:
-          ENV_VAR: value
+          ENV_VAR: value  # Example environment variable, adjust as needed
 
   SchedulerLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: arn:aws:iam::${AWS::AccountId}:role/SchedulerLambdaExecutionRole
+      Role: arn:aws:iam::273354660155:role/SchedulerLambdaExecutionRole  # Replace with your actual AWS account ID
       FunctionName: SchedulerLambdaFunction
-      CodeUri: s3://my-bucket/my-function.zip
       MemorySize: 128
       Timeout: 300
-      Runtime: python3.9  # Ensure runtime is set here
+      Runtime: python3.9
+      Code:
+        S3Bucket: my-bucket  # Replace with your S3 bucket name
+        S3Key: scheduler-function.zip  # Path to your Lambda function code
       Environment:
         Variables:
-          ENV_VAR: value
-
-  MyApi:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: MyApi
-      Description: API for GXP app
-
-  MyDeploymentApi:
-    Type: AWS::ApiGateway::Deployment
-    Properties:
-      RestApiId: !Ref MyApi
-      StageName: prod
-
-  ProxyResourceAPI:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !GetAtt MyApi.RootResourceId
-      RestApiId: !Ref MyApi
-      PathPart: proxy
-
-  ProxyMethodAPI:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: GET
-      ResourceId: !Ref ProxyResourceAPI
-      RestApiId: !Ref MyApi
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SchedulerLambdaFunction.Arn}/invocations
+          ENV_VAR: value  # Example environment variable, adjust as needed
 
 Outputs:
-  MyApiUrl:
-    Description: "API Gateway URL"
-    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  AutoSchedulerFunction:
+    Description: "AutoScheduler Lambda Function ARN"
+    Value: !GetAtt AutoScheduler.Arn
+
+  SchedulerLambdaFunction:
+    Description: "SchedulerLambdaFunction Lambda Function ARN"
+    Value: !GetAtt SchedulerLambdaFunction.Arn
