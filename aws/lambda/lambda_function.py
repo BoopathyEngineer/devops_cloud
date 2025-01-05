@@ -3,3 +3,5 @@ def lambda_handler(event, context):
         "statusCode": 200,
         "body": "Hello from Lambda!"
     }
+d=lambda_handler()
+print(d)
