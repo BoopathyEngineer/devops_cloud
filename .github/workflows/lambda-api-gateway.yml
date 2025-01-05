@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create Lambda function and API Gateway.
+Description: CloudFormation template to create a Lambda function with an API Gateway trigger.
 
 Resources:
   LambdaExecutionRole:
@@ -57,12 +57,13 @@ Resources:
       HttpMethod: GET
       ResourceId: !Ref ApiGatewayResource
       RestApiId: !Ref ApiGateway
+      AuthorizationType: NONE
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
         Uri: !Sub
-          - arn:aws:apigateway:${Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
-          - { Region: !Ref "AWS::Region", LambdaArn: !GetAtt MyLambdaFunction.Arn }
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - { LambdaArn: !GetAtt MyLambdaFunction.Arn }
 
   LambdaPermission:
     Type: AWS::Lambda::Permission
@@ -70,3 +71,5 @@ Resources:
       FunctionName: !Ref MyLambdaFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
+      SourceArn: !Sub
+        arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/GET/hello
