@@ -1,0 +1,63 @@
+name: Tear Down Feat
+on:
+  pull_request:
+    types: [ closed ]
+  workflow_dispatch:
+
+
+jobs:
+  tear-down:
+    name: Tear Down GXP with SAM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up SAM
+        uses: aws-actions/setup-sam@v1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.LIVE_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.LIVE_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Prepare variables for SAM
+        run: |
+          ENV=feature
+          BRANCH_NAME=${{github.head_ref}}
+          SUB_ENV=${BRANCH_NAME:0:30}
+
+          echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
+
+      - name: Empty the S3 Bucket
+        run: aws s3 rm s3://gxp-feature${SUB_ENV} --recursive
+
+      - name: Delete The S3 buckets
+        run: aws s3api delete-bucket --bucket gxp-feature${SUB_ENV} --region us-east-1
+
+
+      # - name: Empty test results s3 bucket
+      #   run: aws s3 rm s3://testresults-feat${SUB_ENV} --recursive
+
+      
+      # - name: Remove swagger bucket
+      #   run: aws s3 rm s3://diana-iris-swagger-feat/${SUB_ENV}
+
+      # - name: Invoke Delete S3 BranchBuckets Lambda
+      #   uses: gagoar/invoke-aws-lambda@master
+      #   with:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.LIVE_AWS_ACCESS_KEY }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.LIVE_AWS_SECRET_ACCESS_KEY }}
+      #     # FunctionName: Utils-Delete-S3-Buckets
+      #     Payload: '{ "branch_name": "${{github.head_ref}}", "branch_name2": "${{github.ref_name}}"}'
+      
+      - name: SAM Delete
+        run: |
+          sam delete --no-prompts \
+          --stack-name gitactions-feature-$SUB_ENV \
+          --region us-east-1
+      
+

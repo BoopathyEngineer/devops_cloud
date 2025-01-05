@@ -1,0 +1,37 @@
+name: Cognito GXP Feat
+on:
+  # On manual trigger
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  cognito_feat_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.LIVE_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.LIVE_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to AWS CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: gxp-feat
+          template: deploy/cognito-template.yaml
+          parameter-overrides: "Environment=feat"
+          capabilities: CAPABILITY_NAMED_IAM
+          no-fail-on-empty-changeset: "1"
+          termination-protection: "1"
+
+      # The bucket `diana-swagger-constants` is already created in S3 that contains all
+      # the dependencies for S3 to run swagger. The dependencies are a bit extensive,
+      # so it was decided to not have S3 create it each time
+      
