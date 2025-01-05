@@ -1,7 +1,6 @@
 name: Lambda API Gateway Deployment
 
 on:
-  # Manual trigger
   workflow_dispatch:
 
 permissions:
@@ -13,11 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      # Step 2: Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -25,7 +22,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # Step 3: Deploy CloudFormation Stack
       - name: Deploy Lambda and API Gateway
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
