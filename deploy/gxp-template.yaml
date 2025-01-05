@@ -13,7 +13,14 @@ Resources:
       Runtime: python3.9
       Code:
         ZipFile: |
+          import josn
           def handler(event, context):
+              data={
+                name:'Boopathy',
+                age:"26"
+              }
+              d=json.dumps(data)
+              print(d)
               return "AutoScheduler is running"
 
       Environment:
