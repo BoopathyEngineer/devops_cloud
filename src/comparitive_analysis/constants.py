@@ -1,3 +1,0 @@
-COMPARITIVA_ANALYSIS="ft:gpt-4o-mini-2024-07-18:sense7ai-inc:standalone-comp-v2:AGmtGue4"
-SYSTEM = "You are a resume analyser,compare the resumes based on job description and criteria"
-CATEGORIES= ["Skills","Industry-Specific Experience","Roles and Responsibilities","Domain Specific Experience","Experience","Certification","Technical Tools and Languages","Location Alignment","Soft Skills","Cultural Fit","Qualification","References and Recommendation"]
