@@ -298,6 +298,11 @@ Resources:
                 >Help Center</a
               >
             </div>
+            <!-- <div class="footer1">
+              Sense7ai Inc,<br />
+              Corporate Commons,<br />
+              6200 Stoneridge MallRoad, Suite300, Pleasanton, CA, USA, 94588
+            </div> -->
             <div style="text-align: center" class="subfooter">
               <a href="https://twitter.com/ai_zita"
                 ><img
@@ -339,6 +344,12 @@ Resources:
         EmailSubject: "Action Required: Verify Your Account"
         
 
+  CognitoPoolDomain: 
+    Type: AWS::Cognito::UserPoolDomain 
+    Properties:
+      UserPoolId: !Ref CognitoUserPool 
+      Domain: !Sub  "gxp-${Environment}-domain"
+  
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -361,5 +372,37 @@ Resources:
       EnableTokenRevocation: false
       ExplicitAuthFlows:
         - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_CUSTOM_AUTH
         - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
+      IdTokenValidity: 12
+      PreventUserExistenceErrors: ENABLED
+      RefreshTokenValidity: 30
+      SupportedIdentityProviders:
+        - COGNITO
+      ReadAttributes:
+        - birthdate
+        - gender
+        - email
+        - "custom:organisation"
+        - "custom:orgid"
+        - "custom:firstname"
+        - "custom:lastname"
+      WriteAttributes:
+        - birthdate
+        - gender
+        - email
+        - "custom:organisation"
+        - "custom:orgid"
+        - "custom:firstname"
+        - "custom:lastname"
+
+Outputs:
+  CognitoUserPoolId:
+    Description: "Cognito User Pool Id"
+    Value: !Ref CognitoUserPool
+
+  CognitoUserPoolClientId:
+    Description: "Cognito User Pool Client Id"
+    Value: !Ref CognitoUserPoolClient

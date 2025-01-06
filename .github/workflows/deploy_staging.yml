@@ -1,10 +1,9 @@
 
-name: GXP Feature
+name: GXP Staging
 on:
-    pull_request:
+    push:
       branches:
         - main
-        - development
       paths-ignore:
         - '*.md'
     workflow_dispatch:
@@ -38,12 +37,10 @@ jobs:
       - name: Prepare variables for SAM
         id: ssm_params
         run: |
-          ENV=feature
-          COGNITO=us-east-1_sts6N2VIW
-          BRANCH_NAME=${{github.head_ref}}
-          SUB_ENV=${BRANCH_NAME:0:30}
-          DB_NAME=zita-${SUB_ENV}
-          CLIENT=vrvc7adabbtqsvheddjikvq8c
+          ENV=staging
+          COGNITO=us-east-1_zqKSoA3Ay
+          DB_NAME=zita
+          CLIENT=dgsg2a63id3p6t9kj4b6anist
           DOMAIN=api.service.zita.ai
           CERT_ARN=$(aws acm list-certificates --certificate-statuses ISSUED \
           --query 'CertificateSummaryList[?DomainName==`api.service.zita.ai`].CertificateArn' \
@@ -58,8 +55,8 @@ jobs:
           PARAMS+=" ParameterKey=CertificateArn,ParameterValue=${CERT_ARN}"
 
           echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
-          echo COGNITO=$COGNITO >> $GITHUB_ENV
           echo BRANCH_NAME=$BRANCH_NAME >> $GITHUB_ENV
+          echo COGNITO=$COGNITO >> $GITHUB_ENV
           echo ENV=$ENV >> $GITHUB_ENV
           echo CLIENT=$CLIENT >> $GITHUB_ENV
           echo PARAMS=$PARAMS >> $GITHUB_ENV
@@ -70,7 +67,7 @@ jobs:
       - name: SAM deploy
         run: |
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
-          --stack-name GXP-$ENV-$SUB_ENV \
+          --stack-name GXP-$ENV \
           --config-file deploy/samconfig-prod.toml --debug \
           --capabilities CAPABILITY_NAMED_IAM \
           --parameter-overrides ${PARAMS}

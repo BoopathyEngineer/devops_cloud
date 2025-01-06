@@ -3,11 +3,11 @@ version = 0.1
 [default.build.parameters]
 s3_bucket = "zita-prod"
 s3_prefix = "zita-prod"
-region = "us-east-2"
+region = "us-east-1"
 [default.deploy]
 [default.deploy.parameters]
 s3_bucket = "zita-prod"
 s3_prefix = "zita-prod"
-region = "us-east-2"
+region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"

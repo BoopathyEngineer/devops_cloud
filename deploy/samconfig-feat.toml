@@ -1,13 +1,14 @@
 version = 0.1
 [default]
 [default.build.parameters]
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-d9rreooialv5"
-s3_prefix = "aws-sam-cli-managed-default-samclisourcebucket-d9rreooialv5"
-region = "us-east-2"
+s3_bucket = "zita-feat"
+s3_prefix = "zita-feat"
+region = "us-east-1"
 [default.deploy]
 [default.deploy.parameters]
-s3_bucket = "laws-sam-cli-managed-default-samclisourcebucket-d9rreooialv5"
-s3_prefix = "aws-sam-cli-managed-default-samclisourcebucket-d9rreooialv5"
-region = "us-east-2"
+s3_bucket = "zita-feat"
+s3_prefix = "zita-feat"
+region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_NAMED_IAM"
+image_repositories = []

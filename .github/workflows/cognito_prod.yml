@@ -1,4 +1,4 @@
-name: Cognito GXP Feat
+name: Cognito GXP Prod
 on:
   # On manual trigger
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  cognito_feat_deploy:
+  cognito_prod_deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -24,9 +24,9 @@ jobs:
       - name: Deploy to AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: gxp-feat
+          name: gxp-prod
           template: deploy/cognito-template.yaml
-          parameter-overrides: "Environment=feat"
+          parameter-overrides: "Environment=prod"
           capabilities: CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
           termination-protection: "1"

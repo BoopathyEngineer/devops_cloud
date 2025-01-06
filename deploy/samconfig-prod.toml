@@ -4,7 +4,7 @@
 
     [default]
     [default.global.parameters]
-    stack_name = "devopsapi"
+    stack_name = "GXPAPI"
 
     [default.build.parameters]
     cached = true
