@@ -1,0 +1,14 @@
+requests
+openai==1.1.1
+tika
+urllib3==1.26.15
+multipart
+requests_toolbelt
+pdfplumber
+python-docx
+python-dotenv==0.19.1
+aws-lambda-powertools==1.21.1
+google-api-python-client
+PyYAML  
+msal
+google_auth_oauthlib
