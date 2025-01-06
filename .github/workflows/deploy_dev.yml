@@ -1,9 +1,83 @@
 
+# name: GXP Develop
+# on:
+#     push:
+#       branches:
+#         - staging
+#       paths-ignore:
+#         - '*.md'
+#     workflow_dispatch:
+
+# jobs:
+#   build-deploy:
+#     name: Deploy gxp with SAM
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 30
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v2
+
+#       - name: Set up Python 3.9
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: "3.9"
+
+#       - name: Set up SAM
+#         uses: aws-actions/setup-sam@v1
+#         with:
+#           version: 1.37.0
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           # aws-region: us-east-2
+#           aws-region: us-west-1
+
+#       - name: Prepare variables for SAM
+#         id: ssm_params
+#         run: |
+#           ENV=dev
+#           COGNITO=us-west-1_HWDqiwCjB
+#           SUB_ENV=''
+#           DB_NAME=gxp
+#           CLIENT=38qp1u7cl5cgp4473dh9b3dd1e
+#           DOMAIN=api.service.zita.ai
+#           CERT_ARN=$(aws acm list-certificates --certificate-statuses ISSUED \
+#           --query 'CertificateSummaryList[?DomainName==`api.service.zita.ai`].CertificateArn' \
+#           --output text)
+
+#           PARAMS="ParameterKey=Environment,ParameterValue=${ENV}"
+#           PARAMS+=" ParameterKey=SubEnv,ParameterValue=${SUB_ENV}"
+#           PARAMS+=" ParameterKey=CognitoID,ParameterValue=${COGNITO}"
+#           PARAMS+=" ParameterKey=ClientID,ParameterValue=${CLIENT}"
+#           PARAMS+=" ParameterKey=DomainName,ParameterValue=${DOMAIN}"
+#           PARAMS+=" ParameterKey=CertificateArn,ParameterValue=${CERT_ARN}"
+          
+#           echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
+#           echo BRANCH_NAME=$BRANCH_NAME >> $GITHUB_ENV
+#           echo COGNITO=$COGNITO >> $GITHUB_ENV
+#           echo ENV=$ENV >> $GITHUB_ENV
+#           echo CLIENT=$CLIENT >> $GITHUB_ENV
+#           echo PARAMS=$PARAMS >> $GITHUB_ENV
+          
+
+#       - name: SAM build
+#         run: sam build --use-container --template deploy/gxp-template.yaml --config-file deploy/samconfig-prod.toml
+
+#       - name: SAM deploy
+#         run: |
+#           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
+#           --stack-name GXP-$ENV \
+#           --config-file deploy/samconfig-prod.toml --debug \
+#           --capabilities CAPABILITY_NAMED_IAM \
+#           --parameter-overrides ${PARAMS}
 name: GXP Develop
 on:
     push:
       branches:
-        - staging
+        - development
       paths-ignore:
         - '*.md'
     workflow_dispatch:
@@ -18,7 +92,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Python 3.9
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: "3.9"
 
@@ -30,23 +104,27 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # aws-region: us-east-2
-          aws-region: us-west-1
+          aws-access-key-id: ${{ secrets.LIVE_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.LIVE_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       - name: Prepare variables for SAM
         id: ssm_params
         run: |
           ENV=dev
-          COGNITO=us-west-1_HWDqiwCjB
+          COGNITO=us-east-1_sts6N2VIW
           SUB_ENV=''
           DB_NAME=gxp
-          CLIENT=38qp1u7cl5cgp4473dh9b3dd1e
+          CLIENT=vrvc7adabbtqsvheddjikvq8c
           DOMAIN=api.service.zita.ai
           CERT_ARN=$(aws acm list-certificates --certificate-statuses ISSUED \
           --query 'CertificateSummaryList[?DomainName==`api.service.zita.ai`].CertificateArn' \
           --output text)
+
+          if [ -z "$CERT_ARN" ]; then
+            echo "Certificate ARN not found for domain: $DOMAIN"
+            exit 1
+          fi
 
           PARAMS="ParameterKey=Environment,ParameterValue=${ENV}"
           PARAMS+=" ParameterKey=SubEnv,ParameterValue=${SUB_ENV}"
@@ -54,22 +132,28 @@ jobs:
           PARAMS+=" ParameterKey=ClientID,ParameterValue=${CLIENT}"
           PARAMS+=" ParameterKey=DomainName,ParameterValue=${DOMAIN}"
           PARAMS+=" ParameterKey=CertificateArn,ParameterValue=${CERT_ARN}"
-          
+
           echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
           echo BRANCH_NAME=$BRANCH_NAME >> $GITHUB_ENV
           echo COGNITO=$COGNITO >> $GITHUB_ENV
           echo ENV=$ENV >> $GITHUB_ENV
           echo CLIENT=$CLIENT >> $GITHUB_ENV
           echo PARAMS=$PARAMS >> $GITHUB_ENV
-          
 
       - name: SAM build
         run: sam build --use-container --template deploy/gxp-template.yaml --config-file deploy/samconfig-prod.toml
 
       - name: SAM deploy
         run: |
+          echo "Deploying SAM Stack..."
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
           --stack-name GXP-$ENV \
           --config-file deploy/samconfig-prod.toml --debug \
           --capabilities CAPABILITY_NAMED_IAM \
           --parameter-overrides ${PARAMS}
+
+          if [ $? -ne 0 ]; then
+            echo "SAM deployment failed"
+            exit 1
+          fi
+          echo "SAM deployment successful"
