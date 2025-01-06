@@ -106,7 +106,6 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # aws-region: us-east-2
           aws-region: us-west-1
 
       - name: Prepare variables for SAM
@@ -118,21 +117,12 @@ jobs:
           DB_NAME=gxp
           CLIENT=vrvc7adabbtqsvheddjikvq8c
           DOMAIN=api.service.zita.ai
-          CERT_ARN=$(aws acm list-certificates --certificate-statuses ISSUED \
-          --query 'CertificateSummaryList[?DomainName==`api.service.zita.ai`].CertificateArn' \
-          --output text)
-
-          if [ -z "$CERT_ARN" ]; then
-            echo "Certificate ARN not found for domain: $DOMAIN"
-            exit 1
-          fi
 
           PARAMS="ParameterKey=Environment,ParameterValue=${ENV}"
           PARAMS+=" ParameterKey=SubEnv,ParameterValue=${SUB_ENV}"
           PARAMS+=" ParameterKey=CognitoID,ParameterValue=${COGNITO}"
           PARAMS+=" ParameterKey=ClientID,ParameterValue=${CLIENT}"
           PARAMS+=" ParameterKey=DomainName,ParameterValue=${DOMAIN}"
-          PARAMS+=" ParameterKey=CertificateArn,ParameterValue=${CERT_ARN}"
 
           echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
           echo BRANCH_NAME=$BRANCH_NAME >> $GITHUB_ENV
