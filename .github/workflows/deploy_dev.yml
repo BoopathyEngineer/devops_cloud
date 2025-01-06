@@ -77,7 +77,7 @@ name: GXP Develop
 on:
     push:
       branches:
-        - development
+        - staging
       paths-ignore:
         - '*.md'
     workflow_dispatch:
