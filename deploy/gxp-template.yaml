@@ -12,11 +12,7 @@ Parameters:
     Description: Sub environment to deploy the application
     Type: String
     Default: ''
-    # AllowedValues:
-    #   - staging
-    #   - production
-    # - staging
-    #   - production
+
   SubEnv:
     Type: String
     Default: ''
@@ -129,19 +125,7 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource: "*"
-
-  #: S3-Bucket
-  # S3BranchBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub gxp-${Environment}${SubEnv}
-  #     AccessControl: Private
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-
-  #: COGNTIO AUTHENTICATION FOR AUTH AuthHandlerFunction         
+    
   MyApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:

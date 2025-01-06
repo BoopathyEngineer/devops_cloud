@@ -47,7 +47,7 @@ Resources:
   SchedulerFunction:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: lambda_function.handler  # Matches `lambda_function.py`
+      Handler: lambda_function.handler 
       Role: arn:aws:iam::273354660155:role/lambda_learn
       FunctionName: SchedulerFunction
       MemorySize: 128
