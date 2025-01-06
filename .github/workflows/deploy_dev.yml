@@ -76,7 +76,7 @@
 
 name: DCQC Feature
 on:
-    pull_request:
+    push:
       branches:
         - testint
         - development
