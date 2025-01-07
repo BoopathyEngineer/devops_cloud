@@ -31,13 +31,7 @@ Parameters:
     Type: String
     Description: cognito client id
 
-  CertificateArn:
-    Type: String
-    Description: ARN of the SSL certificate
-  
-  DomainName:
-    Type: String
-    Description: The custom domain name for the API Gateway
+
 
 
 Globals:
@@ -47,15 +41,6 @@ Globals:
     Tracing: Active
     Environment:
       Variables:
-        # CONFIGTABLE: !Ref DynamoDBConfigTable
-        # USERTABLE: !Ref DynamoDBUserTable
-        # CLIENTPURCHASETABLE: !Ref DynamoDBClientPurchaseTable
-        # APITABLE: !Ref DynamoDBApiTable
-        # NOTIFICATIONTABLE: !Ref DynamoDBNotificationTable
-        # INVOICETABLE: !Ref DynamoDBInvoiceTable
-        # COUPONTABLE: !Ref DynamoDBCouponTable
-        # COUPONUSERSPECIFICTABLE: !Ref DynamoDBCouponUserspecificTable
-        # USERCOUPONTABLE: !Ref DynamoDBUserCouponTable
         ENV: !Sub ${Environment}
         COGNITO : !Sub ${CognitoID}
         CLIENT : !Sub ${ClientID}
@@ -67,9 +52,6 @@ Conditions:
 
   SchedulerOn: 
     Fn::Or:
-      # - Fn::Equals:
-      #     - !Ref Environment
-      #     - feature
       - Fn::Equals:
           - !Ref Environment
           - dev
@@ -79,11 +61,6 @@ Conditions:
       - Fn::Equals:
           - !Ref Environment
           - prod
-
-  # Api:
-  #   TracingEnabled: true
-
-
 Resources:
   #: ROLE
   LambdaRole:
@@ -129,19 +106,7 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource: "*"
-
-  #: S3-Bucket
-  # S3BranchBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub gxp-${Environment}${SubEnv}
-  #     AccessControl: Private
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-
-  #: COGNTIO AUTHENTICATION FOR AUTH AuthHandlerFunction         
+     
   MyApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -445,7 +410,6 @@ Resources:
     Properties:
       Name: !Sub gxpscheduler-${Environment}${SubEnv}
       ScheduleExpression: "cron(0 10 * * ? *)" # 10 o clock at every day
-      # ScheduleExpression: "rate(1 minute)" # Trigger every 1 seconds
       State: !If [SchedulerOn, "ENABLED", "DISABLED"]
       Targets:
         - Arn: !GetAtt SchedulerLambdaFunction.Arn
@@ -459,245 +423,6 @@ Resources:
       CodeUri: ../src/
       Handler: scheduler.scheduler_handler
       Runtime: python3.9
-    # DependsOn: LambdaLogGroup
-
-
-  #: DYNAMO_DB
-  GXPUserTable:
-    Type: AWS::DynamoDB::Table
-    # DeletionPolicy: Retain
-    Properties:
-      TableName: !Sub gxp_user-${Environment}${SubEnv}
-      KeySchema:
-        - AttributeName: user_id
-          KeyType: HASH
-        - AttributeName: thread_id
-          KeyType: RANGE
-      AttributeDefinitions:
-        - AttributeName: user_id
-          AttributeType: S
-        - AttributeName: thread_id
-          AttributeType: S
-      BillingMode: PAY_PER_REQUEST
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-      SSESpecification:
-        SSEEnabled: true
-
-  GXPThreadChatTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub gxp_thread_chat-${Environment}${SubEnv}
-      KeySchema:
-        - AttributeName: thread_id
-          KeyType: HASH
-        - AttributeName: message_id
-          KeyType: RANGE
-      AttributeDefinitions:
-        - AttributeName: thread_id
-          AttributeType: S
-        - AttributeName: message_id
-          AttributeType: S
-      BillingMode: PAY_PER_REQUEST
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-      SSESpecification:
-        SSEEnabled: true
-
-  # DynamoDBApiTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: email
-  #         KeyType: HASH
-  #       - AttributeName: date 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: email
-  #         AttributeType: S # Integer
-  #       - AttributeName: date
-  #         AttributeType: S 
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  # DynamoDBNotificationTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: email
-  #         KeyType: HASH
-  #       - AttributeName: notification 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: email
-  #         AttributeType: S # Integer
-  #       - AttributeName: notification
-  #         AttributeType: N
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  # DynamoDBCouponUserspecificTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-userspecific-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: coupon_code
-  #         KeyType: HASH
-  #       - AttributeName: email 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: coupon_code
-  #         AttributeType: S # Integer
-  #       - AttributeName: email
-  #         AttributeType: S
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  # DynamoDBInvoiceTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: email
-  #         KeyType: HASH
-  #       - AttributeName: invoice 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: email
-  #         AttributeType: S # Integer
-  #       - AttributeName: invoice
-  #         AttributeType: S
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  # DynamoDBClientPurchaseTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-purchase-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: email
-  #         KeyType: HASH
-  #       - AttributeName: api_name 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: email
-  #         AttributeType: S # String
-  #       - AttributeName: api_name
-  #         AttributeType: S
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  # DynamoDBCouponTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: coupon_code
-  #         KeyType: HASH
-  #       - AttributeName: api_id 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: coupon_code
-  #         AttributeType: S 
-  #       - AttributeName: api_id
-  #         AttributeType: S
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  # DynamoDBUserCouponTable:
-  #   Type: AWS::DynamoDB::Table
-  #   # DeletionPolicy: Retain
-  #   Properties:
-  #     TableName: !Sub gxp-${Environment}${SubEnv}
-  #     KeySchema:
-  #       - AttributeName: coupon_code
-  #         KeyType: HASH
-  #       - AttributeName: email 
-  #         KeyType: RANGE
-  #     AttributeDefinitions:
-  #       - AttributeName: coupon_code
-  #         AttributeType: S # Integer
-  #       - AttributeName: email
-  #         AttributeType: S
-  #     BillingMode: PAY_PER_REQUEST
-  #     PointInTimeRecoverySpecification:
-  #       PointInTimeRecoveryEnabled: true
-  #     Tags:
-  #       - Key: environment
-  #         Value: !Ref Environment
-  #     SSESpecification:
-  #       SSEEnabled: true
-
-  ##: Define the custom domain
-  # CustomDomain:
-  #   Type: AWS::ApiGateway::DomainName
-  #   Properties:
-  #     DomainName: !Sub ${DomainName}  # Replace with your custom domain
-  #     EndpointConfiguration:
-  #       Types: 
-  #         - EDGE 
-  #     RegionalCertificateArn: !Ref CertificateArn  
-  #     SecurityPolicy: TLS_1_2  
-  
-  #: Map the custom domain to the RestApi
-  # BasePathMapping:
-  #   Type: AWS::ApiGateway::BasePathMapping
-  #   Condition: CustomDomains
-  #   Properties:
-  #     DomainName: !Ref DomainName  
-  #     RestApiId: !Ref MyApi  
-  #     Stage: !Ref MyStage
-
   #: API_KEY AUTHENTICATION FOR LambdaHandlerFunction   
   MyApi:
     Type: AWS::ApiGateway::RestApi
@@ -813,8 +538,6 @@ Resources:
 
   MyStage:
     Type: AWS::ApiGateway::Stage
-    # DependsOn:
-    #   - MyDeploymentApi
     Properties:
       StageName: prod
       DeploymentId: !Ref MyDeploymentApi
@@ -822,7 +545,6 @@ Resources:
 
   MyUsagePlan:
     Type: AWS::ApiGateway::UsagePlan
-    # Condition: CreateUsagePlan
     Properties:
       UsagePlanName: !Sub gxp-gateway-${Environment}${SubEnv}
       ApiStages:
@@ -848,8 +570,6 @@ Resources:
       KeyId: !Ref MyApiKey
       KeyType: "API_KEY"
       UsagePlanId: !Ref MyUsagePlan
-
-
 #: Outputs
 Outputs:
   LambdaHandlerFunction:
@@ -864,12 +584,7 @@ Outputs:
   ClientID:
     Description: ClientID of the Cognito User Pool
     Value: !Sub ${ClientID}
-  CertificateArn:
-    Description: CertificateArn of this Workflow
-    Value: !Sub ${CertificateArn}
-  DomainName:
-    Description: DomainName of this Workflow
-    Value: !Sub ${DomainName}
+
   ApiId:
     Description: "ID of the API Gateway"
     Value: !Ref MyApi
