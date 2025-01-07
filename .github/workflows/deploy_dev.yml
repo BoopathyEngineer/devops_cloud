@@ -27,6 +27,7 @@ jobs:
         with:
           version: 1.37.0
 
+          
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
