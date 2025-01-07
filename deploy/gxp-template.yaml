@@ -156,7 +156,7 @@ Resources:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS,PATCH'"
               method.response.header.Access-Control-Allow-Credentials: "'true'"
-        TimeoutInMillis: 59000
+        TimeoutInMillis: 29000
       MethodResponses:
         - StatusCode: 200
           ResponseParameters:
@@ -182,7 +182,7 @@ Resources:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         RequestTemplates:
           application/json: "{\"statusCode\": 200}"
-        TimeoutInMillis: 59000
+        TimeoutInMillis: 29000
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -270,7 +270,7 @@ Resources:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS,PATCH'"
               method.response.header.Access-Control-Allow-Credentials: "'true'"
-        TimeoutInMillis: 59000
+        TimeoutInMillis: 29000
       MethodResponses:
         - StatusCode: 200
           ResponseParameters:
@@ -296,7 +296,7 @@ Resources:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         RequestTemplates:
           application/json: "{\"statusCode\": 200}"
-        TimeoutInMillis: 59000
+        TimeoutInMillis: 29000  # Valid timeout value in the range 50-29000 ms
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
@@ -305,6 +305,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+
 
   Default4XXMySignUpGatewayResponse:
     Type: AWS::ApiGateway::GatewayResponse
@@ -469,7 +470,7 @@ Resources:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
               method.response.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS,PATCH'"
               method.response.header.Access-Control-Allow-Credentials: "'true'"
-        TimeoutInMillis: 59000
+        TimeoutInMillis: 29000
       MethodResponses:
         - StatusCode: 200
           ResponseParameters:
@@ -496,7 +497,7 @@ Resources:
               method.response.header.Access-Control-Allow-Origin: "'*'"
         RequestTemplates:
           application/json: "{\"statusCode\": 200}"
-        TimeoutInMillis: 59000
+        TimeoutInMillis: 29000
       MethodResponses:
         - StatusCode: 200
           ResponseModels:
