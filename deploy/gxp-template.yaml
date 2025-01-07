@@ -354,7 +354,7 @@ Resources:
     Properties:
       FunctionName: !Sub gxpgateway-${Environment}${SubEnv}
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ../src/
+      CodeUri: ../aws/src/
       Handler: app.lambda_handler
       Runtime: python3.9
       Events:
@@ -370,7 +370,7 @@ Resources:
     Properties:
       FunctionName: !Sub gxpauth-${Environment}${SubEnv}
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ../src/
+      CodeUri: ../aws/src/
       Handler: app.auth_handler
       Runtime: python3.9
       Events:
@@ -386,7 +386,7 @@ Resources:
     Properties:
       FunctionName: !Sub gxpsignup-${Environment}${SubEnv}
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ../src/
+      CodeUri: ../aws/src/
       Handler: signin.auth_handler
       Runtime: python3.9
       Events:
@@ -420,7 +420,7 @@ Resources:
     Properties:
       FunctionName: !Sub gxpappscheduler-${Environment}${SubEnv}
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ../src/
+      CodeUri: ../aws/src/
       Handler: scheduler.scheduler_handler
       Runtime: python3.9
   #: API_KEY AUTHENTICATION FOR LambdaHandlerFunction   
