@@ -1,13 +1,12 @@
-
 name: GXP Feature
 on:
-    pull_request:
-      branches:
-        - main
-        - development
-      paths-ignore:
-        - '*.md'
-    workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - development
+    paths-ignore:
+      - '*.md'
+  workflow_dispatch:
 
 jobs:
   build-deploy:
@@ -38,32 +37,29 @@ jobs:
       - name: Prepare variables for SAM
         id: ssm_params
         run: |
-          ENV=feature
-          COGNITO=us-east-1_sts6N2VIW
-          BRANCH_NAME=${{github.head_ref}}
-          SUB_ENV=${BRANCH_NAME:0:30}
-          DB_NAME=zita-${SUB_ENV}
-          CLIENT=vrvc7adabbtqsvheddjikvq8c
-
+          # Set environment variables
+          ENV=dev
+          BRANCH_NAME=${{ github.head_ref }}
+          SUB_ENV=${BRANCH_NAME:0:30} # Sub-environment limited to 30 characters
+          
+          # Define parameters
           PARAMS="ParameterKey=Environment,ParameterValue=${ENV}"
           PARAMS+=" ParameterKey=SubEnv,ParameterValue=${SUB_ENV}"
-          PARAMS+=" ParameterKey=CognitoID,ParameterValue=${COGNITO}"
-          PARAMS+=" ParameterKey=ClientID,ParameterValue=${CLIENT}"
 
-          echo SUB_ENV=$SUB_ENV >> $GITHUB_ENV
-          echo COGNITO=$COGNITO >> $GITHUB_ENV
-          echo BRANCH_NAME=$BRANCH_NAME >> $GITHUB_ENV
-          echo ENV=$ENV >> $GITHUB_ENV
-          echo CLIENT=$CLIENT >> $GITHUB_ENV
-          echo PARAMS=$PARAMS >> $GITHUB_ENV
+          # Set outputs for future steps
+          echo "SUB_ENV=$SUB_ENV" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "PARAMS=$PARAMS" >> $GITHUB_ENV
 
       - name: SAM build
-        run: sam build --use-container --template deploy/gxp-template.yaml --config-file deploy/samconfig-prod.toml
+        run: |
+          sam build --use-container \
+          --template-file deploy/gx-template.yaml
 
       - name: SAM deploy
         run: |
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
           --stack-name GXP-$ENV-$SUB_ENV \
-          --config-file deploy/samconfig-prod.toml --debug \
           --capabilities CAPABILITY_NAMED_IAM \
           --parameter-overrides ${PARAMS}
