@@ -4,8 +4,8 @@ Description: SAM template for GXP environment
 
 Globals:
   Function:
-    Timeout: 10  # Default timeout for all functions
-    Runtime: python3.9  # Default runtime for all functions
+    Timeout: 10 
+    Runtime: python3.9  
     MemorySize: 128
 
 Resources:
