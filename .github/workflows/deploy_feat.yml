@@ -22,7 +22,6 @@ jobs:
         with:
           python-version: "3.9"
 
-          
       - name: Set up SAM
         uses: aws-actions/setup-sam@v1
         with:
@@ -38,16 +37,11 @@ jobs:
       - name: Prepare variables for SAM
         id: ssm_params
         run: |
-          # Set environment variables
           ENV=dev
           BRANCH_NAME=${{ github.head_ref }}
-          SUB_ENV=${BRANCH_NAME:0:30} # Sub-environment limited to 30 characters
-          
-          # Define parameters
+          SUB_ENV=${BRANCH_NAME:0:30}
           PARAMS="ParameterKey=Environment,ParameterValue=${ENV}"
           PARAMS+=" ParameterKey=SubEnv,ParameterValue=${SUB_ENV}"
-
-          # Set outputs for future steps
           echo "SUB_ENV=$SUB_ENV" >> $GITHUB_ENV
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
           echo "ENV=$ENV" >> $GITHUB_ENV
@@ -55,12 +49,11 @@ jobs:
 
       - name: SAM build
         run: |
-          sam build --use-container \
-          --template-file deploy/gx-template.yaml
+          sam build --use-container --template-file deploy/gx-template.yaml
 
       - name: SAM deploy
         run: |
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
-          --stack-name GXP-$ENV-$SUB_ENV \
-          --capabilities CAPABILITY_NAMED_IAM \
-          --parameter-overrides ${PARAMS}
+            --stack-name GXP-$ENV-$SUB_ENV \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides ${PARAMS}
