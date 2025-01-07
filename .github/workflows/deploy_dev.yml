@@ -3,7 +3,7 @@ name: GXP Develop
 on:
     push:
       branches:
-        - development
+        - learn
       paths-ignore:
         - '*.md'
     workflow_dispatch:
