@@ -2,21 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   GXPAPI
-
   Sample SAM Template for GXPAPI
-
-## More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-
 Parameters:
   Environment:
     Description: Sub environment to deploy the application
     Type: String
     Default: ''
-    # AllowedValues:
-    #   - staging
-    #   - production
-    # - staging
-    #   - production
   SubEnv:
     Type: String
     Default: ''
@@ -47,29 +38,15 @@ Globals:
     Tracing: Active
     Environment:
       Variables:
-        # CONFIGTABLE: !Ref DynamoDBConfigTable
-        # USERTABLE: !Ref DynamoDBUserTable
-        # CLIENTPURCHASETABLE: !Ref DynamoDBClientPurchaseTable
-        # APITABLE: !Ref DynamoDBApiTable
-        # NOTIFICATIONTABLE: !Ref DynamoDBNotificationTable
-        # INVOICETABLE: !Ref DynamoDBInvoiceTable
-        # COUPONTABLE: !Ref DynamoDBCouponTable
-        # COUPONUSERSPECIFICTABLE: !Ref DynamoDBCouponUserspecificTable
-        # USERCOUPONTABLE: !Ref DynamoDBUserCouponTable
         ENV: !Sub ${Environment}
         COGNITO : !Sub ${CognitoID}
         CLIENT : !Sub ${ClientID}
         APIGATEWAY : !Ref MyApi
-        # BUCKETNAME : !Ref S3BranchBucket
-
 Conditions:
   CustomDomains: !Equals [!Ref Environment, "dev"]
 
   SchedulerOn: 
     Fn::Or:
-      # - Fn::Equals:
-      #     - !Ref Environment
-      #     - feature
       - Fn::Equals:
           - !Ref Environment
           - dev
@@ -79,9 +56,6 @@ Conditions:
       - Fn::Equals:
           - !Ref Environment
           - prod
-
-  # Api:
-  #   TracingEnabled: true
 
 
 Resources:
@@ -128,20 +102,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
-                Resource: "*"
-
-  #: S3-Bucket
-  # S3BranchBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub gxp-${Environment}${SubEnv}
-  #     AccessControl: Private
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-
-  #: COGNTIO AUTHENTICATION FOR AUTH AuthHandlerFunction         
+                Resource: "*"     
   MyApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
