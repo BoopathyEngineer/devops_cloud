@@ -96,5 +96,6 @@ def main():
         else:
             print(f"Failed to fetch weather data for {city}")
 
+
 if __name__ == "__main__":
     main()
